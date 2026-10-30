@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Ccircle cx='96' cy='96' r='64' fill='%2311aa00'/%3E%3C/svg%3E" sizes="any" type="image/svg+xml">
+  <title>MyPWA</title>
+  <style>
+    body { width:100%; height:100%; background-color:#263238; color:#B3BBBF; font-family:Arial,Helvetica,sans-serif; margin:0; overflow:hidden; }
+    a { color:#efefef; font-weight:bold; }
+    #tabNav { display:flex; justify-content:center; gap:12px; padding:10px 0; background:#1a2327; border-bottom:1px solid #37474f; }
+    #tabNav a { padding:8px 20px; border-radius:8px; background:#37474f; text-decoration:none; font-size:15px; transition:background .2s; }
+    #tabNav a.active { background:#11aa00; color:#fff; }
+    .page { display:none; width:100%; height:calc(100vh - 44px); overflow-y:auto; }
+    .page.active { display:block; }
+    #page-test1,#page-test2 { padding:20px; box-sizing:border-box; }
+    .slowmo-container { background:#000; width:100%; height:100%; position:relative; overflow:hidden; }
+    #v { width:100vw; height:100vh; object-fit:cover; }
+    #msg { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); font-size:48px; font-weight:900; text-align:center; background:rgba(0,0,0,.75); padding:30px 60px; border-radius:30px; z-index:10; cursor:pointer; color:#0f0; font-family:system-ui,sans-serif; }
+    #review { position:fixed; inset:0; display:none; z-index:20; background:rgba(0,0,0,.70); color:#0f0; }
+    #reviewCard { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:min(92vw,560px); background:rgba(0,0,0,.85); border-radius:26px; padding:24px 22px; text-align:center; }
+    #reviewCard h2 { margin:0 0 10px 0; font-size:34px; color:#0f0; }
+    #reviewInfo { font-size:14px; opacity:.85; margin:8px 0 16px 0; color:#b6ffb6; line-height:1.4; }
+    .btnRow { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+    .btn { font-size:18px; font-weight:900; padding:14px 18px; border-radius:14px; border:none; cursor:pointer; font-family:system-ui,sans-serif; }
+    .btnSave{background:#0f0;color:#000} .btnShare{background:#0aa;color:#000} .btnReplay{background:#444;color:#fff} .btnContinue{background:#f00;color:#fff}
+    .hint { margin-top:14px; font-size:13px; color:#c6ffc6; opacity:.9; line-height:1.35; }
+    #playbackControls { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); display:none; flex-direction:row; gap:32px; align-items:center; z-index:15; pointer-events:none; }
+    .controlBtn { pointer-events:auto; background:rgba(0,0,0,.72); color:#0f0; border:none; border-radius:50%; width:68px; height:68px; font-size:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 20px rgba(0,255,0,.3); user-select:none; -webkit-tap-highlight-color:transparent; font-family:system-ui,sans-serif; }
+    #playPauseBtn { width:78px; height:78px; font-size:44px; }
+    #recordBtn { position:fixed; bottom:48px; left:50%; transform:translateX(-50%); z-index:12; display:none; font-family:system-ui,sans-serif; font-size:22px; font-weight:900; letter-spacing:.03em; padding:20px 44px; border:3px solid #0f0; border-radius:999px; background:#0f0; color:#000; cursor:pointer; box-shadow:0 0 32px rgba(0,255,0,.5),0 8px 24px rgba(0,0,0,.65); user-select:none; -webkit-tap-highlight-color:transparent; }
+    #recordBtn:active { transform:translateX(-50%) scale(.96); box-shadow:0 0 18px rgba(0,255,0,.7); }
+    video::-webkit-media-controls-panel,video::-webkit-media-controls-play-button,video::-webkit-media-controls { display:none!important; -webkit-appearance:none; }
+  </style>
+</head>
+<body>
+
+  <nav id="tabNav">
+    <a href="#test1" data-tab="test1">📄 Test 1</a>
+    <a href="#test2" data-tab="test2">📄 Test 2</a>
+    <a href="#slowmo" data-tab="slowmo">🎬 Slow-Mo GO!</a>
+  </nav>
+
+  <div id="page-test1" class="page active">
+    <h1>Test Page 1</h1><p>This is the first test page from MyPWA.</p><div id="display1"></div>
+  </div>
+  <div id="page-test2" class="page">
+    <h1>Test Page 2</h1><p>This is the second test page from MyPWA.</p><div id="display2"></div>
+  </div>
+  <div id="page-slowmo" class="page">
+    <div class="slowmo-container">
+      <video id="v" playsinline muted></video>
+      <div id="msg">Tap anywhere to start</div>
+      <button id="recordBtn" type="button">Press to record</button>
+      <div id="playbackControls">
+        <button id="back3Btn" class="controlBtn">⏪</button>
+        <button id="playPauseBtn" class="controlBtn">⏸</button>
+        <button id="forward1Btn" class="controlBtn">⏩</button>
+      </div>
+      <div id="review">
+        <div id="reviewCard">
+          <h2>Clip ready</h2><div id="reviewInfo"></div>
+          <div class="btnRow">
+            <button class="btn btnSave" id="saveBtn">SAVE</button>
+            <button class="btn btnShare" id="shareBtn">SHARE</button>
+            <button class="btn btnReplay" id="replayBtn">REPLAY</button>
+            <button class="btn btnContinue" id="continueBtn">CONTINUE</button>
+          </div>
+          <div class="hint" id="shareHint">On iPhone, SHARE usually gives the best "Save Video" / "Save to Files" options.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
